@@ -42,7 +42,7 @@ Reqs
 A few Pre-Reqs need to be met and are documented in the Reference Architecture already.  **Ansible 2.6 is required**, the ansible control host running the deployment needs to be registered and subscribed to `rhel-7-server-ansible-2.6-rpms`.  Creating a [Service Principal](https://access.redhat.com/documentation/en-us/reference_architectures/2018/html-single/deploying_and_managing_openshift_3.9_on_azure/#service_principal) is documented as well as setting up the Azure CLI.  Currently the Azure CLI is setup on the ansible control host running the deployment using the playbook `azure_cli.yml` or by following instructions here, [Azure CLI Setup](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli?toc=%2Fazure%2Fazure-resource-manager%2Ftoc.json&view=azure-cli-latest).
 
  1. Ansible control host setup:
-    Register the ansible control host used for this deployment with valid RedHat subscription thats able to pull down ansible     2.5 or manually install ansible 2.5 along with atomic-openshift-utils.  To quickly create a VM using Vagrant try out [vagrant-rhel](https://github.com/hornjason/vagrant-rhel).
+    Register the ansible control host used for this deployment with valid RedHat subscription thats able to pull down ansible 2.6 or manually install ansible 2.6 along with atomic-openshift-utils.  To quickly create a VM using Vagrant try out [vagrant-rhel](https://github.com/hornjason/vagrant-rhel).
 ```
     sudo subscription-manager register --username < username > --password < password >
     sudo subscription-manager attach --pool < pool_id >
