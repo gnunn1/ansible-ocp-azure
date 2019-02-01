@@ -11,11 +11,11 @@ This project automates the installation of OpenShift on Azure using ansible.  It
 ## Virtual Machine Sizing
 The following table outlines the sizes used to better understand the vCpu and Memory quotas needed to successfully deploy OpenShift on Azure.  Verify your current subscription quotas meet the below requirements.
 
-Instance | Hostname | # |VM Size | vCpu's | Memory  
+Instance | Hostname | # |VM Size | vCpu's | Memory
 -------- | -------- | - | ------ | ------ | -----
-Master Nodes | ocp-master-# | 3 | Standard_D4s_v3 | 4 | 16  
-Infra Nodes | ocp-infra-# | 3 | Standard_D4s_v3 | 4 | 16   
-App Nodes | ocp-app-# | 3 | Standard_D2S_v3 | 2 | 8  
+Master Nodes | ocp-master-# | 3 | Standard_D4s_v3 | 4 | 16
+Infra Nodes | ocp-infra-# | 3 | Standard_D4s_v3 | 4 | 16
+App Nodes | ocp-app-# | 3 | Standard_D2S_v3 | 2 | 8
 Bastion | bastion | 1 | Standard_D1 | 1 | 3.5
 Total | | 13 | | 55 | 219.5Gb
 
@@ -39,7 +39,7 @@ az vm list-usage --location westus --output table
 ## Pre-Reqs
 
 Reqs
-A few Pre-Reqs need to be met and are documented in the Reference Architecture already.  **Ansible 2.5 is required**, the ansible control host running the deployment needs to be registered and subscribed to `rhel-7-server-ansible-2.5-rpms`.  Creating a [Service Principal](https://access.redhat.com/documentation/en-us/reference_architectures/2018/html-single/deploying_and_managing_openshift_3.9_on_azure/#service_principal) is documented as well as setting up the Azure CLI.  Currently the Azure CLI is setup on the ansible control host running the deployment using the playbook `azure_cli.yml` or by following instructions here, [Azure CLI Setup](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli?toc=%2Fazure%2Fazure-resource-manager%2Ftoc.json&view=azure-cli-latest).
+A few Pre-Reqs need to be met and are documented in the Reference Architecture already.  **Ansible 2.6 is required**, the ansible control host running the deployment needs to be registered and subscribed to `rhel-7-server-ansible-2.6-rpms`.  Creating a [Service Principal](https://access.redhat.com/documentation/en-us/reference_architectures/2018/html-single/deploying_and_managing_openshift_3.9_on_azure/#service_principal) is documented as well as setting up the Azure CLI.  Currently the Azure CLI is setup on the ansible control host running the deployment using the playbook `azure_cli.yml` or by following instructions here, [Azure CLI Setup](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli?toc=%2Fazure%2Fazure-resource-manager%2Ftoc.json&view=azure-cli-latest).
 
  1. Ansible control host setup:
     Register the ansible control host used for this deployment with valid RedHat subscription thats able to pull down ansible     2.5 or manually install ansible 2.5 along with atomic-openshift-utils.  To quickly create a VM using Vagrant try out [vagrant-rhel](https://github.com/hornjason/vagrant-rhel).
@@ -47,22 +47,20 @@ A few Pre-Reqs need to be met and are documented in the Reference Architecture a
     sudo subscription-manager register --username < username > --password < password >
     sudo subscription-manager attach --pool < pool_id >
     sudo subscription-manager repos --disable=*
-    sudo subscription-manager repos \
-    --enable="rhel-7-server-rpms" \
-    --enable="rhel-7-server-extras-rpms" \
-    --enable="rhel-7-server-ose-3.9-rpms" \
-    --enable="rhel-7-fast-datapath-rpms" \
-    --enable="rhel-7-server-ansible-2.5-rpms"
+    subscription-manager repos \
+        --enable="rhel-7-server-rpms" \
+        --enable="rhel-7-server-extras-rpms" \
+        --enable="rhel-7-server-ose-3.11-rpms" \
+        --enable="rhel-7-server-ansible-2.6-rpms"
 
     sudo yum -y install ansible atomic-openshift-utils git
 
-As of now a fix for deployging multiple OCS clusters is only available by cloning and using the latest release-3.10 branch from https://github.com/openshift/openshift-ansible.git
 ```
 
  2. Clone this repository
 
  ```
- git clone https://github.com/hornjason/ansible-ocp-azure.git; cd ansible-ocp-azure
+ git clone https://github.com/xxxx/ansible-ocp-azure.git; cd ansible-ocp-azure
  ```
  3.  Install Azure CLI,  using playbook included or manually following above directions.
  ```
@@ -85,6 +83,9 @@ Most defaults are specified in `role/azure/defaults/main.yml`,  Sensitive inform
 
  - **location**:  - Azure location for deployment ex. `eastus`
  - **rg**:  - Azure Resource Group ex. `test-rg`
+ - **rg_label**: - Azure Resource Group, same as rg typically
+ - **registry_service_account_user**: Registry user for registry.redhat.io, create service account at https://access.redhat.com/terms-based-registry/
+ - **registry_service_account_token**: Token for registry.redhat.io, obtain from service account from previous variable
  - **admin_user**: - SSH user that will be created on each VM ex. `cloud-user`
  - **admin_pubkey**: - Copy paste the Public SSH key that will be added to authorized_keys on each VM ex.
  `ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAB`
@@ -123,7 +124,7 @@ By Default the HTPasswdPasswordIdentityProvider is used but can be customized,  
 After all pre-reqs are met and required variables have been filled out the deployment consists of running the following:
 `ansible-playbook deploy.yml -e @vars.yml`
 
-The ansible control host running the deployment will be setup to use ssh proxy through the bastion in order to reach all nodes.  The openshift inventory `hosts` file will be templated into the project root directory and used for the Installation.  
+The ansible control host running the deployment will be setup to use ssh proxy through the bastion in order to reach all nodes.  The openshift inventory `hosts` file will be templated into the project root directory and used for the Installation.
 
 ## Destroy
 `ansible-playbook destroy.yml -e@vars.yml`
